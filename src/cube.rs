@@ -1,5 +1,4 @@
 use colored::Colorize;
-use std::array::from_fn;
 
 #[derive(Debug)]
 
@@ -58,7 +57,7 @@ fn corner_colors(corner: u8) -> &'static [Color; 3] {
         5 => &[Yellow, Red, Blue],
         6 => &[Yellow, Green, Red],
         7 => &[Yellow, Orange, Green],
-        _ => panic!("Haven't implemented this corner's colors yet: {}", corner),
+        _ => panic!("Invalid corner number: {}", corner),
     }
 }
 
@@ -193,10 +192,10 @@ pub const F: Cube = Cube {
 impl Cube {
     pub fn apply(&self, mv: &Self) -> Self {
         Cube {
-            ep: from_fn(|i| self.ep[mv.ep[i] as usize]),
-            eo: from_fn(|i| (self.eo[mv.ep[i] as usize] + mv.eo[i]) % 2),
-            cp: from_fn(|i| self.cp[mv.cp[i] as usize]),
-            co: from_fn(|i| (self.co[mv.cp[i] as usize] + mv.co[i]) % 3),
+            ep: std::array::from_fn(|i| self.ep[mv.ep[i] as usize]),
+            eo: std::array::from_fn(|i| (self.eo[mv.ep[i] as usize] + mv.eo[i]) % 2),
+            cp: std::array::from_fn(|i| self.cp[mv.cp[i] as usize]),
+            co: std::array::from_fn(|i| (self.co[mv.cp[i] as usize] + mv.co[i]) % 3),
         }
     }
 
