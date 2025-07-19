@@ -165,12 +165,18 @@ pub const R: Cube = Cube {
     cp: [0, 2, 6, 3, 4, 1, 5, 7],
 };
 
-// untested
+pub const Rprime: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],
+    co: [0, 2, 1, 0, 0, 1, 2, 0],
+    cp: [0, 5, 1, 3, 4, 6, 2, 7],
+};
+
 pub const L: Cube = Cube {
     eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ep: [0, 1, 2, 4, 11, 5, 6, 3, 8, 9, 10, 7],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [4, 1, 2, 0, 8, 5, 6, 3],
+    co: [1, 0, 0, 2, 2, 0, 0, 1],
+    cp: [4, 1, 2, 0, 7, 5, 6, 3],
 };
 
 // untested
@@ -183,10 +189,17 @@ pub const D: Cube = Cube {
 
 // untested
 pub const F: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 1, 2, 3, 4, 5, 6, 7],
+    eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
+    ep: [0, 1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11],
+    co: [0, 0, 2, 1, 0, 0, 1, 2],
+    cp: [0, 1, 3, 7, 4, 5, 2, 6],
+};
+
+pub const B: Cube = Cube {
+    eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+    ep: [5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11],
+    co: [2, 1, 0, 0, 1, 2, 0, 0],
+    cp: [1, 5, 2, 3, 0, 4, 6, 7],
 };
 
 impl Cube {
@@ -225,7 +238,7 @@ impl FaceletAssociation {
             }
             FaceletAssociation::Edge(ep, eo) => {
                 let epi = cube.ep[ep as usize];
-                let eoi = ((eo + cube.eo[ep as usize]) % 3) as usize;
+                let eoi = ((eo + cube.eo[ep as usize]) % 2) as usize;
                 edge_colors(epi)[eoi]
             }
             FaceletAssociation::Center(color) => color,
@@ -249,8 +262,9 @@ impl Color {
 #[cfg(test)]
 mod tests {
     use super::{
+        B,
         Color::{self, *},
-        R, SOLVED,
+        D, F, L, R, SOLVED, U,
     };
 
     const SOLVED_COLORS: [Color; 54] = [
@@ -261,9 +275,87 @@ mod tests {
         Yellow,
     ];
 
+    const L_COLORS: [Color; 54] = [
+        Blue, White, White, Blue, White, White, Blue, White, White, Orange, Orange, Orange, White,
+        Green, Green, Red, Red, Red, Blue, Blue, Yellow, Orange, Orange, Orange, White, Green,
+        Green, Red, Red, Red, Blue, Blue, Yellow, Orange, Orange, Orange, White, Green, Green, Red,
+        Red, Red, Blue, Blue, Yellow, Green, Yellow, Yellow, Green, Yellow, Yellow, Green, Yellow,
+        Yellow,
+    ];
+
+    const R_COLORS: [Color; 54] = [
+        White, White, Green, White, White, Green, White, White, Green, Orange, Orange, Orange,
+        Green, Green, Yellow, Red, Red, Red, White, Blue, Blue, Orange, Orange, Orange, Green,
+        Green, Yellow, Red, Red, Red, White, Blue, Blue, Orange, Orange, Orange, Green, Green,
+        Yellow, Red, Red, Red, White, Blue, Blue, Yellow, Yellow, Blue, Yellow, Yellow, Blue,
+        Yellow, Yellow, Blue,
+    ];
+
+    const U_COLORS: [Color; 54] = [
+        White, White, White, White, White, White, White, White, White, Green, Green, Green, Red,
+        Red, Red, Blue, Blue, Blue, Orange, Orange, Orange, Orange, Orange, Orange, Green, Green,
+        Green, Red, Red, Red, Blue, Blue, Blue, Orange, Orange, Orange, Green, Green, Green, Red,
+        Red, Red, Blue, Blue, Blue, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow,
+        Yellow,
+    ];
+
+    const D_COLORS: [Color; 54] = [
+        White, White, White, White, White, White, White, White, White, Orange, Orange, Orange,
+        Green, Green, Green, Red, Red, Red, Blue, Blue, Blue, Orange, Orange, Orange, Green, Green,
+        Green, Red, Red, Red, Blue, Blue, Blue, Blue, Blue, Blue, Orange, Orange, Orange, Green,
+        Green, Green, Red, Red, Red, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow,
+        Yellow, Yellow,
+    ];
+
+    const F_COLORS: [Color; 54] = [
+        White, White, White, White, White, White, Orange, Orange, Orange, Orange, Orange, Yellow,
+        Green, Green, Green, White, Red, Red, Blue, Blue, Blue, Orange, Orange, Yellow, Green,
+        Green, Green, White, Red, Red, Blue, Blue, Blue, Orange, Orange, Yellow, Green, Green,
+        Green, White, Red, Red, Blue, Blue, Blue, Red, Red, Red, Yellow, Yellow, Yellow, Yellow,
+        Yellow, Yellow,
+    ];
+
+    const B_COLORS: [Color; 54] = [
+        Red, Red, Red, White, White, White, White, White, White, White, Orange, Orange, Green,
+        Green, Green, Red, Red, Yellow, Blue, Blue, Blue, White, Orange, Orange, Green, Green,
+        Green, Red, Red, Yellow, Blue, Blue, Blue, White, Orange, Orange, Green, Green, Green, Red,
+        Red, Yellow, Blue, Blue, Blue, Yellow, Yellow, Yellow, Yellow, Yellow, Yellow, Orange,
+        Orange, Orange,
+    ];
+
     #[test]
     fn solved() {
         assert_eq!(SOLVED.to_facelets(), SOLVED_COLORS);
+    }
+
+    #[test]
+    fn l() {
+        assert_eq!(SOLVED.apply(&L).to_facelets(), L_COLORS);
+    }
+
+    #[test]
+    fn r() {
+        assert_eq!(SOLVED.apply(&R).to_facelets(), R_COLORS);
+    }
+
+    #[test]
+    fn u() {
+        assert_eq!(SOLVED.apply(&U).to_facelets(), U_COLORS);
+    }
+
+    #[test]
+    fn d() {
+        assert_eq!(SOLVED.apply(&D).to_facelets(), D_COLORS);
+    }
+
+    #[test]
+    fn f() {
+        assert_eq!(SOLVED.apply(&F).to_facelets(), F_COLORS);
+    }
+
+    #[test]
+    fn b() {
+        assert_eq!(SOLVED.apply(&B).to_facelets(), B_COLORS);
     }
 
     #[test]

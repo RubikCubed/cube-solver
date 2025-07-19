@@ -1,12 +1,13 @@
 mod cube;
 
-use crate::cube::{R, SOLVED, U};
+use crate::cube::{B, D, F, L, R, SOLVED, U};
 
 fn main() {
     let cube = SOLVED;
-    //wslFdiJOHlet rotated = cube.apply(&U).apply(&R);
+    let rotated = cube.apply(&R).apply(&R).apply(&R);
 
-    //cube.print_net();
-    //rotated.print_net()
-    println!("{:?}", cube.to_facelets());
+    cube.print_net();
+    rotated.print_net();
+    println!("{:?}", rotated);
+    println!("{:?}", rotated.to_facelets());
 }
