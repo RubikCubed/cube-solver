@@ -310,11 +310,24 @@ impl Cube {
 }
 
 impl std::iter::Product for Cube {
-    fn product<I>(iter: I) -> Self
-    where
-        I: Iterator<Item = Self>,
-    {
+    fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(SOLVED, |acc, cur| acc.apply(&cur))
+    }
+}
+
+impl std::ops::Mul for &Cube {
+    type Output = Cube;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.apply(rhs)
+    }
+}
+
+impl std::ops::Mul for Cube {
+    type Output = Cube;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.apply(&rhs)
     }
 }
 
@@ -499,9 +512,9 @@ mod tests {
     #[test]
     fn u2() {
         assert_eq!(
-            SOLVED.apply(&U).apply(&U).to_facelets(),
-            SOLVED.apply(&UPRIME).apply(&UPRIME).to_facelets(),
-        );
+            (SOLVED * U2).to_facelets(),
+            (SOLVED * UPRIME * UPRIME).to_facelets()
+        )
     }
 
     #[test]
