@@ -157,6 +157,13 @@ pub const U: Cube = Cube {
     cp: [3, 0, 1, 2, 4, 5, 6, 7],
 };
 
+pub const UPRIME: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [1, 2, 3, 0, 4, 5, 6, 7],
+};
+
 // rotate the right face clockwise
 pub const R: Cube = Cube {
     eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -165,7 +172,7 @@ pub const R: Cube = Cube {
     cp: [0, 2, 6, 3, 4, 1, 5, 7],
 };
 
-pub const Rprime: Cube = Cube {
+pub const RPRIME: Cube = Cube {
     eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ep: [0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],
     co: [0, 2, 1, 0, 0, 1, 2, 0],
@@ -179,7 +186,13 @@ pub const L: Cube = Cube {
     cp: [4, 1, 2, 0, 7, 5, 6, 3],
 };
 
-// untested
+pub const LPRIME: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 1, 2, 7, 3, 5, 6, 11, 8, 9, 10, 4],
+    co: [1, 0, 0, 2, 2, 0, 0, 1],
+    cp: [3, 1, 2, 7, 0, 5, 6, 4],
+};
+
 pub const D: Cube = Cube {
     eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ep: [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 8],
@@ -187,7 +200,13 @@ pub const D: Cube = Cube {
     cp: [0, 1, 2, 3, 5, 6, 7, 4],
 };
 
-// untested
+pub const DPRIME: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 1, 2, 3, 4, 5, 6, 7, 11, 8, 9, 10],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [0, 1, 2, 3, 7, 4, 5, 6],
+};
+
 pub const F: Cube = Cube {
     eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
     ep: [0, 1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11],
@@ -195,11 +214,67 @@ pub const F: Cube = Cube {
     cp: [0, 1, 3, 7, 4, 5, 2, 6],
 };
 
+pub const FPRIME: Cube = Cube {
+    eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
+    ep: [0, 1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11],
+    co: [0, 0, 2, 1, 0, 0, 1, 2],
+    cp: [0, 1, 6, 2, 4, 5, 7, 3],
+};
+
 pub const B: Cube = Cube {
     eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
     ep: [5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11],
     co: [2, 1, 0, 0, 1, 2, 0, 0],
     cp: [1, 5, 2, 3, 0, 4, 6, 7],
+};
+
+pub const BPRIME: Cube = Cube {
+    eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+    ep: [4, 1, 2, 3, 8, 0, 6, 7, 5, 9, 10, 11],
+    co: [2, 1, 0, 0, 1, 2, 0, 0],
+    cp: [4, 0, 2, 3, 5, 1, 6, 7],
+};
+
+pub const U2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [2, 3, 0, 1, 4, 5, 6, 7],
+};
+
+pub const R2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 9, 2, 3, 4, 6, 5, 7, 8, 1, 10, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [0, 6, 5, 3, 4, 2, 1, 7],
+};
+
+pub const L2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 1, 2, 11, 7, 5, 6, 4, 8, 9, 10, 3],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [7, 1, 2, 4, 3, 5, 6, 0],
+};
+
+pub const D2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 8, 9],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [0, 1, 2, 3, 6, 7, 4, 5],
+};
+
+pub const F2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [0, 1, 10, 3, 4, 5, 7, 6, 8, 9, 2, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [0, 1, 7, 6, 4, 5, 3, 2],
+};
+
+pub const B2: Cube = Cube {
+    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ep: [8, 1, 2, 3, 5, 4, 6, 7, 0, 9, 10, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [5, 4, 2, 3, 1, 0, 6, 7],
 };
 
 impl Cube {
@@ -262,9 +337,9 @@ impl Color {
 #[cfg(test)]
 mod tests {
     use super::{
-        B,
+        B, B2, BPRIME,
         Color::{self, *},
-        D, F, L, R, SOLVED, U,
+        D, D2, DPRIME, F, F2, FPRIME, L, L2, LPRIME, R, R2, RPRIME, SOLVED, U, U2, UPRIME,
     };
 
     const SOLVED_COLORS: [Color; 54] = [
@@ -334,8 +409,24 @@ mod tests {
     }
 
     #[test]
+    fn lprime() {
+        assert_eq!(
+            SOLVED.apply(&LPRIME).to_facelets(),
+            SOLVED.apply(&L).apply(&L).apply(&L).to_facelets(),
+        );
+    }
+
+    #[test]
     fn r() {
         assert_eq!(SOLVED.apply(&R).to_facelets(), R_COLORS);
+    }
+
+    #[test]
+    fn rprime() {
+        assert_eq!(
+            SOLVED.apply(&RPRIME).to_facelets(),
+            SOLVED.apply(&R).apply(&R).apply(&R).to_facelets(),
+        );
     }
 
     #[test]
@@ -344,8 +435,24 @@ mod tests {
     }
 
     #[test]
+    fn uprime() {
+        assert_eq!(
+            SOLVED.apply(&UPRIME).to_facelets(),
+            SOLVED.apply(&U).apply(&U).apply(&U).to_facelets(),
+        );
+    }
+
+    #[test]
     fn d() {
         assert_eq!(SOLVED.apply(&D).to_facelets(), D_COLORS);
+    }
+
+    #[test]
+    fn dprime() {
+        assert_eq!(
+            SOLVED.apply(&DPRIME).to_facelets(),
+            SOLVED.apply(&D).apply(&D).apply(&D).to_facelets(),
+        );
     }
 
     #[test]
@@ -354,8 +461,72 @@ mod tests {
     }
 
     #[test]
+    fn fprime() {
+        assert_eq!(
+            SOLVED.apply(&FPRIME).to_facelets(),
+            SOLVED.apply(&F).apply(&F).apply(&F).to_facelets(),
+        );
+    }
+
+    #[test]
     fn b() {
         assert_eq!(SOLVED.apply(&B).to_facelets(), B_COLORS);
+    }
+
+    #[test]
+    fn bprime() {
+        assert_eq!(
+            SOLVED.apply(&BPRIME).to_facelets(),
+            SOLVED.apply(&B).apply(&B).apply(&B).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn u2() {
+        assert_eq!(
+            SOLVED.apply(&U).apply(&U).to_facelets(),
+            SOLVED.apply(&UPRIME).apply(&UPRIME).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn d2() {
+        assert_eq!(
+            SOLVED.apply(&D).apply(&D).to_facelets(),
+            SOLVED.apply(&DPRIME).apply(&DPRIME).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn r2() {
+        assert_eq!(
+            SOLVED.apply(&R).apply(&R).to_facelets(),
+            SOLVED.apply(&RPRIME).apply(&RPRIME).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn l2() {
+        assert_eq!(
+            SOLVED.apply(&L).apply(&L).to_facelets(),
+            SOLVED.apply(&LPRIME).apply(&LPRIME).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn f2() {
+        assert_eq!(
+            SOLVED.apply(&F).apply(&F).to_facelets(),
+            SOLVED.apply(&FPRIME).apply(&FPRIME).to_facelets(),
+        );
+    }
+
+    #[test]
+    fn b2() {
+        assert_eq!(
+            SOLVED.apply(&B).apply(&B).to_facelets(),
+            SOLVED.apply(&BPRIME).apply(&BPRIME).to_facelets(),
+        );
     }
 
     #[test]
