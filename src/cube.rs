@@ -1,9 +1,6 @@
-use std::iter::Product;
-
 use colored::Colorize;
 
-#[derive(Debug)]
-
+#[derive(Debug, Clone)]
 pub struct Cube {
     eo: [u8; 12], // all <2
     ep: [u8; 12], // all unique, all <2
@@ -312,7 +309,7 @@ impl Cube {
     }
 }
 
-impl Product for &Cube {
+impl std::iter::Product for Cube {
     fn product<I>(iter: I) -> Self
     where
         I: Iterator<Item = Self>,

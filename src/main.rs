@@ -8,7 +8,7 @@ fn main() {
 
     rotated.print_net();
 
-    let result: Cube = [R, R].iter().product();
+    let result: Cube = [R, R].into_iter().product();
 
     result.print_net();
 }
