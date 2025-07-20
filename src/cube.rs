@@ -1,3 +1,5 @@
+use std::iter::Product;
+
 use colored::Colorize;
 
 #[derive(Debug)]
@@ -144,6 +146,13 @@ fn associate_facelet(facelet: u8) -> FaceletAssociation {
 // predefined states
 pub const SOLVED: Cube = Cube {
     eo: [0; 12],
+    ep: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    co: [0, 0, 0, 0, 0, 0, 0, 0],
+    cp: [0, 1, 2, 3, 4, 5, 6, 7],
+};
+
+pub const SUPERFLIP: Cube = Cube {
+    eo: [1; 12],
     ep: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     co: [0, 0, 0, 0, 0, 0, 0, 0],
     cp: [0, 1, 2, 3, 4, 5, 6, 7],
@@ -300,6 +309,15 @@ impl Cube {
 
     pub fn to_facelets(&self) -> [Color; 54] {
         std::array::from_fn(|i| associate_facelet(i as u8).to_color(self))
+    }
+}
+
+impl Product for &Cube {
+    fn product<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        iter.fold(SOLVED, |acc, cur| acc.apply(&cur))
     }
 }
 
