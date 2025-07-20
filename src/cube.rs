@@ -24,7 +24,7 @@ pub enum Color {
     Green,
 }
 
-pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<String>> {
+pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<(String, Cube)>> {
     for depth in 0..=max_depth {
         println!("starting depth {depth}...");
 
@@ -57,13 +57,26 @@ pub const POSSIBLE_MOVES: [(&str, Cube); 18] = [
     ("B'", BPRIME),
 ];
 
-pub fn dfs(depth: u8, path: Vec<String>, max_depth: u8, cube: Cube) -> Option<Vec<String>> {
+pub fn dfs(
+    depth: u8,
+    path: Vec<(String, Cube)>,
+    max_depth: u8,
+    cube: Cube,
+) -> Option<Vec<(String, Cube)>> {
     if depth >= max_depth {
         if cube == SOLVED { Some(path) } else { None }
     } else {
+        if let [.., (xs, x), (ys, y)] = &path[..] {
+            if x * y == SOLVED {
+                // if the last 2 moves cancel each other out, go back
+                println!("{} negates {}, pruning...", xs, ys);
+                return None;
+            }
+        }
+
         POSSIBLE_MOVES.into_iter().find_map(|(ms, m)| {
             let mut path = path.clone();
-            path.push(ms.to_string());
+            path.push((ms.to_string(), m.clone()));
             dfs(depth + 1, path, max_depth, &cube * &m)
         })
     }
