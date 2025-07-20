@@ -365,9 +365,8 @@ impl Color {
 #[cfg(test)]
 mod tests {
     use super::{
-        B, B2, BPRIME,
         Color::{self, *},
-        D, D2, DPRIME, F, F2, FPRIME, L, L2, LPRIME, R, R2, RPRIME, SOLVED, U, U2, UPRIME,
+        *,
     };
 
     const SOLVED_COLORS: [Color; 54] = [
@@ -563,5 +562,13 @@ mod tests {
             SOLVED.apply(&R).apply(&R).apply(&R).apply(&R).to_facelets(),
             SOLVED_COLORS
         )
+    }
+
+    #[test]
+    fn superflip() {
+        #[rustfmt::skip]
+        let superflip_moves: Cube = U * R2 * F * B * R * B2 * R * U2 * L * B2 * R * UPRIME * DPRIME * R2 * F * RPRIME * L * B2 * U2 * F2;
+
+        assert_eq!(superflip_moves.to_facelets(), SUPERFLIP.to_facelets())
     }
 }
