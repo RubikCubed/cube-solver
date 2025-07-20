@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Cube {
     eo: [u8; 12], // all <2
     ep: [u8; 12], // all unique, all <2
@@ -22,6 +22,51 @@ pub enum Color {
     Orange,
     Blue,
     Green,
+}
+
+pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<String>> {
+    for depth in 0..=max_depth {
+        println!("starting depth {depth}...");
+
+        let cube = cube.clone();
+        if let Some(path) = dfs(0, Vec::new(), depth, cube) {
+            return Some(path);
+        }
+    }
+    None
+}
+
+pub const POSSIBLE_MOVES: [(&str, Cube); 18] = [
+    ("R", R),
+    ("R2", R2),
+    ("R'", RPRIME),
+    ("L", L),
+    ("L2", L2),
+    ("L'", LPRIME),
+    ("U", U),
+    ("U2", U2),
+    ("U'", UPRIME),
+    ("D", D),
+    ("D2", D2),
+    ("D'", DPRIME),
+    ("F", F),
+    ("F2", F2),
+    ("F'", FPRIME),
+    ("B", B),
+    ("B2", B2),
+    ("B'", BPRIME),
+];
+
+pub fn dfs(depth: u8, path: Vec<String>, max_depth: u8, cube: Cube) -> Option<Vec<String>> {
+    if depth >= max_depth {
+        if cube == SOLVED { Some(path) } else { None }
+    } else {
+        POSSIBLE_MOVES.into_iter().find_map(|(ms, m)| {
+            let mut path = path.clone();
+            path.push(ms.to_string());
+            dfs(depth + 1, path, max_depth, &cube * &m)
+        })
+    }
 }
 
 fn edge_colors(edge: u8) -> &'static [Color; 2] {
