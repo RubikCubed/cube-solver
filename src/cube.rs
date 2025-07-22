@@ -1,5 +1,7 @@
 use colored::Colorize;
 
+use super::mv::Move;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cube {
     eo: [u8; 12], // all <2
@@ -24,7 +26,7 @@ pub enum Color {
     Green,
 }
 
-pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<(String, Cube)>> {
+pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<Move>> {
     for depth in 0..=max_depth {
         eprintln!("starting depth {depth}...");
         let start = std::time::Instant::now();
@@ -51,50 +53,29 @@ pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<(String, Cube)>> {
     None
 }
 
-pub const POSSIBLE_MOVES: [(&str, Cube); 18] = [
-    ("R", R),
-    ("R2", R2),
-    ("R'", RPRIME),
-    ("L", L),
-    ("L2", L2),
-    ("L'", LPRIME),
-    ("U", U),
-    ("U2", U2),
-    ("U'", UPRIME),
-    ("D", D),
-    ("D2", D2),
-    ("D'", DPRIME),
-    ("F", F),
-    ("F2", F2),
-    ("F'", FPRIME),
-    ("B", B),
-    ("B2", B2),
-    ("B'", BPRIME),
-];
-
 pub fn dfs(
     depth: u8,
-    path: Vec<(String, Cube)>,
+    path: Vec<Move>,
     max_depth: u8,
     cube: Cube,
     nodes: &mut (u64, u64),
-) -> Option<Vec<(String, Cube)>> {
+) -> Option<Vec<Move>> {
     if depth >= max_depth {
         nodes.1 += 1;
         if cube == SOLVED { Some(path) } else { None }
     } else {
-        if let [.., (xs, x), (ys, y)] = &path[..] {
-            if x * y == SOLVED {
+        if let [.., x, y] = &path[..] {
+            if x.cancels(*y) {
                 return None;
             }
         }
 
         nodes.0 += 1;
 
-        POSSIBLE_MOVES.into_iter().find_map(|(ms, m)| {
+        Move::ALL.into_iter().find_map(|m| {
             let mut path = path.clone();
-            path.push((ms.to_string(), m.clone()));
-            dfs(depth + 1, path, max_depth, &cube * &m, nodes)
+            path.push(*m);
+            dfs(depth + 1, path, max_depth, &cube * *m, nodes)
         })
     }
 }
@@ -403,6 +384,14 @@ impl std::ops::Mul for Cube {
 
     fn mul(self, rhs: Self) -> Self::Output {
         self.apply(&rhs)
+    }
+}
+
+impl std::ops::Mul<Move> for &Cube {
+    type Output = Cube;
+
+    fn mul(self, rhs: Move) -> Self::Output {
+        self.apply(&rhs.to_cube())
     }
 }
 

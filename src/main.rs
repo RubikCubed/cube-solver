@@ -1,4 +1,7 @@
+#![feature(stmt_expr_attributes)]
+
 mod cube;
+mod mv;
 
 use crate::cube::*;
 
@@ -14,7 +17,7 @@ fn main() {
         println!(
             "Solution Found: {}",
             path.into_iter()
-                .map(|(s, _)| s)
+                .map(|m| m.to_str())
                 .collect::<Vec<_>>()
                 .join(" ")
         );
