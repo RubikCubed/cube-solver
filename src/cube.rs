@@ -26,10 +26,25 @@ pub enum Color {
 
 pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<(String, Cube)>> {
     for depth in 0..=max_depth {
-        println!("starting depth {depth}...");
+        eprintln!("starting depth {depth}...");
+        let start = std::time::Instant::now();
+        let mut nodes = (0, 0);
 
         let cube = cube.clone();
-        if let Some(path) = dfs(0, Vec::new(), depth, cube) {
+        let path = dfs(0, Vec::new(), depth, cube, &mut nodes);
+        let elapsed = start.elapsed();
+        eprintln!(
+            "searched {} nodes in {:?} at {:.0} nodes/s, branching factor: {:.2}",
+            nodes.0 + nodes.1,
+            elapsed,
+            (nodes.0 + nodes.1) as f64 / elapsed.as_secs_f64(),
+            if nodes.0 != 0 {
+                (nodes.0 + nodes.1 - 1) as f64 / nodes.0 as f64
+            } else {
+                0.0
+            }
+        );
+        if let Some(path) = path {
             return Some(path);
         }
     }
@@ -62,22 +77,24 @@ pub fn dfs(
     path: Vec<(String, Cube)>,
     max_depth: u8,
     cube: Cube,
+    nodes: &mut (u64, u64),
 ) -> Option<Vec<(String, Cube)>> {
     if depth >= max_depth {
+        nodes.1 += 1;
         if cube == SOLVED { Some(path) } else { None }
     } else {
         if let [.., (xs, x), (ys, y)] = &path[..] {
             if x * y == SOLVED {
-                // if the last 2 moves cancel each other out, go back
-                println!("{} negates {}, pruning...", xs, ys);
                 return None;
             }
         }
 
+        nodes.0 += 1;
+
         POSSIBLE_MOVES.into_iter().find_map(|(ms, m)| {
             let mut path = path.clone();
             path.push((ms.to_string(), m.clone()));
-            dfs(depth + 1, path, max_depth, &cube * &m)
+            dfs(depth + 1, path, max_depth, &cube * &m, nodes)
         })
     }
 }
