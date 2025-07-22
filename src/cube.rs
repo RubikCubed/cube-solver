@@ -26,6 +26,26 @@ pub enum Color {
     Green,
 }
 
+pub trait Heuristic: Copy {
+    fn lower_bound(self, state: &Cube) -> u8;
+}
+
+#[derive(Clone, Copy)]
+struct ZeroBound;
+impl Heuristic for ZeroBound {
+    fn lower_bound(self, _state: &Cube) -> u8 {
+        0
+    }
+}
+
+#[derive(Clone, Copy)]
+struct EOBound;
+impl Heuristic for EOBound {
+    fn lower_bound(self, state: &Cube) -> u8 {
+        state.eo.iter().sum::<u8>() % 4
+    }
+}
+
 pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<Move>> {
     for depth in 0..=max_depth {
         eprintln!("starting depth {depth}...");
@@ -33,7 +53,7 @@ pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<Move>> {
         let mut nodes = (0, 0);
 
         let cube = cube.clone();
-        let path = dfs(0, Vec::new(), depth, cube, &mut nodes);
+        let path = dfs(0, Vec::new(), depth, cube, &mut nodes, EOBound);
         let elapsed = start.elapsed();
         eprintln!(
             "searched {} nodes in {:?} at {:.0} nodes/s, branching factor: {:.2}",
@@ -59,10 +79,13 @@ pub fn dfs(
     max_depth: u8,
     cube: Cube,
     nodes: &mut (u64, u64),
+    h: impl Heuristic,
 ) -> Option<Vec<Move>> {
     if depth >= max_depth {
         nodes.1 += 1;
         if cube == SOLVED { Some(path) } else { None }
+    } else if depth + h.lower_bound(&cube) >= max_depth {
+        None
     } else {
         if let [.., x, y] = &path[..] {
             if x.cancels(*y) {
@@ -75,7 +98,7 @@ pub fn dfs(
         Move::ALL.into_iter().find_map(|m| {
             let mut path = path.clone();
             path.push(*m);
-            dfs(depth + 1, path, max_depth, &cube * *m, nodes)
+            dfs(depth + 1, path, max_depth, &cube * *m, nodes, h)
         })
     }
 }
