@@ -31,7 +31,7 @@ pub trait Heuristic: Copy {
 }
 
 #[derive(Clone, Copy)]
-struct ZeroBound;
+pub struct ZeroBound;
 impl Heuristic for ZeroBound {
     fn lower_bound(self, _state: &Cube) -> u8 {
         0
@@ -39,29 +39,81 @@ impl Heuristic for ZeroBound {
 }
 
 #[derive(Clone, Copy)]
-struct EOBound;
+pub struct EOBound;
 impl Heuristic for EOBound {
     fn lower_bound(self, state: &Cube) -> u8 {
         state.eo.iter().sum::<u8>() % 4
     }
 }
 
-pub fn ids(cube: Cube, max_depth: u8) -> Option<Vec<Move>> {
+#[rustfmt::skip]
+impl<H0, H1> Heuristic for (H0, H1) 
+where 
+    H0: Heuristic,
+    H1: Heuristic,
+{
+    fn lower_bound(self, state: &Cube) -> u8 {
+        let (h0, h1) = self;
+        [
+            h0.lower_bound(state),
+            h1.lower_bound(state),
+        ].into_iter().max().unwrap()
+    }
+}
+
+#[rustfmt::skip]
+impl<H0, H1, H2> Heuristic for (H0, H1, H2) 
+where 
+    H0: Heuristic,
+    H1: Heuristic,
+    H2: Heuristic,
+{
+    fn lower_bound(self, state: &Cube) -> u8 {
+        let (h0, h1, h2) = self;
+        [
+            h0.lower_bound(state),
+            h1.lower_bound(state),
+            h2.lower_bound(state),
+        ].into_iter().max().unwrap()
+    }
+}
+
+#[rustfmt::skip]
+impl<H0, H1, H2, H3> Heuristic for (H0, H1, H2, H3) 
+where 
+    H0: Heuristic,
+    H1: Heuristic,
+    H2: Heuristic,
+    H3: Heuristic,
+{
+    fn lower_bound(self, state: &Cube) -> u8 {
+        let (h0, h1, h2, h3) = self;
+        [
+            h0.lower_bound(state),
+            h1.lower_bound(state),
+            h2.lower_bound(state),
+            h3.lower_bound(state),
+        ].into_iter().max().unwrap()
+    }
+}
+
+pub fn ida(cube: Cube, max_depth: u8, h: impl Heuristic) -> Option<Vec<Move>> {
     for depth in 0..=max_depth {
         eprintln!("starting depth {depth}...");
         let start = std::time::Instant::now();
         let mut nodes = (0, 0);
 
         let cube = cube.clone();
-        let path = dfs(0, Vec::new(), depth, cube, &mut nodes, EOBound);
+        let path = dfs(0, Vec::new(), depth, cube, &mut nodes, h);
         let elapsed = start.elapsed();
+        let (branches, leaves) = nodes;
         eprintln!(
             "searched {} nodes in {:?} at {:.0} nodes/s, branching factor: {:.2}",
-            nodes.0 + nodes.1,
+            branches + leaves,
             elapsed,
-            (nodes.0 + nodes.1) as f64 / elapsed.as_secs_f64(),
-            if nodes.0 != 0 {
-                (nodes.0 + nodes.1 - 1) as f64 / nodes.0 as f64
+            (branches + leaves) as f64 / elapsed.as_secs_f64(),
+            if branches != 0 {
+                (branches + leaves - 1) as f64 / branches as f64
             } else {
                 0.0
             }
