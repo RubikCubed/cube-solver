@@ -438,6 +438,27 @@ impl Cube {
     pub fn to_facelets(&self) -> [Color; 54] {
         std::array::from_fn(|i| associate_facelet(i as u8).to_color(self))
     }
+
+    pub fn corner_perm_coordinate(&self) -> usize {
+        let mut x = 0;
+        for i in (1..8).rev() {
+            let mut s = 0;
+            for j in (0..i).rev() {
+                if self.cp[j] > self.cp[i] {
+                    s += 1;
+                }
+            }
+            x = (x + s) * i;
+        }
+        x
+    }
+
+    pub fn corner_orientation_coordinate(&self) -> usize {
+        self.co
+            .iter()
+            .take(7)
+            .fold(0, |acc, &co| 3 * acc + co as usize)
+    }
 }
 
 impl std::iter::Product for Cube {
@@ -709,5 +730,29 @@ mod tests {
         let superflip_moves: Cube = U * R2 * F * B * R * B2 * R * U2 * L * B2 * R * UPRIME * DPRIME * R2 * F * RPRIME * L * B2 * U2 * F2;
 
         assert_eq!(superflip_moves.to_facelets(), SUPERFLIP.to_facelets())
+    }
+
+    #[test]
+    fn corner_perms_solved() {
+        assert_eq!(
+            (
+                SOLVED.corner_perm_coordinate(),
+                SOLVED.corner_orientation_coordinate()
+            ),
+            (0, 0)
+        );
+    }
+
+    #[test]
+    fn corner_coordinates() {
+        let scramble = R * U * U * F * L * B;
+
+        assert_eq!(
+            (
+                scramble.corner_perm_coordinate(),
+                scramble.corner_orientation_coordinate()
+            ),
+            (4467, 2050)
+        );
     }
 }
