@@ -1,9 +1,11 @@
 #![feature(stmt_expr_attributes)]
 
 mod cube;
+mod heuristics;
 mod mv;
 
 use crate::cube::*;
+use crate::heuristics::*;
 
 fn main() {
     let scramble = R * U * U * F * L * B;
@@ -17,7 +19,7 @@ fn main() {
 
     let start = std::time::Instant::now();
 
-    if let Some(path) = ida(scramble, 10, (ZeroBound, EOBound)) {
+    if let Some(path) = ida(scramble, 10, Corners::generate().as_ref()) {
         let elapsed = start.elapsed();
         eprintln!("Elapsed: {:?}", elapsed);
         println!(

@@ -1,13 +1,14 @@
 use colored::Colorize;
 
+use super::heuristics::Heuristic;
 use super::mv::Move;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cube {
-    eo: [u8; 12], // all <2
-    ep: [u8; 12], // all unique, all <2
-    co: [u8; 8],  // all <3
-    cp: [u8; 8],  // all unique, all <8
+    pub(crate) eo: [u8; 12], // all <2
+    pub(crate) ep: [u8; 12], // all unique, all <2
+    pub(crate) co: [u8; 8],  // all <3
+    pub(crate) cp: [u8; 8],  // all unique, all <8
 }
 
 pub enum FaceletAssociation {
@@ -24,77 +25,6 @@ pub enum Color {
     Orange,
     Blue,
     Green,
-}
-
-pub trait Heuristic: Copy {
-    fn lower_bound(self, state: &Cube) -> u8;
-}
-
-#[derive(Clone, Copy)]
-pub struct ZeroBound;
-impl Heuristic for ZeroBound {
-    fn lower_bound(self, _state: &Cube) -> u8 {
-        0
-    }
-}
-
-#[derive(Clone, Copy)]
-pub struct EOBound;
-impl Heuristic for EOBound {
-    fn lower_bound(self, state: &Cube) -> u8 {
-        state.eo.iter().sum::<u8>() % 4
-    }
-}
-
-#[rustfmt::skip]
-impl<H0, H1> Heuristic for (H0, H1) 
-where 
-    H0: Heuristic,
-    H1: Heuristic,
-{
-    fn lower_bound(self, state: &Cube) -> u8 {
-        let (h0, h1) = self;
-        [
-            h0.lower_bound(state),
-            h1.lower_bound(state),
-        ].into_iter().max().unwrap()
-    }
-}
-
-#[rustfmt::skip]
-impl<H0, H1, H2> Heuristic for (H0, H1, H2) 
-where 
-    H0: Heuristic,
-    H1: Heuristic,
-    H2: Heuristic,
-{
-    fn lower_bound(self, state: &Cube) -> u8 {
-        let (h0, h1, h2) = self;
-        [
-            h0.lower_bound(state),
-            h1.lower_bound(state),
-            h2.lower_bound(state),
-        ].into_iter().max().unwrap()
-    }
-}
-
-#[rustfmt::skip]
-impl<H0, H1, H2, H3> Heuristic for (H0, H1, H2, H3) 
-where 
-    H0: Heuristic,
-    H1: Heuristic,
-    H2: Heuristic,
-    H3: Heuristic,
-{
-    fn lower_bound(self, state: &Cube) -> u8 {
-        let (h0, h1, h2, h3) = self;
-        [
-            h0.lower_bound(state),
-            h1.lower_bound(state),
-            h2.lower_bound(state),
-            h3.lower_bound(state),
-        ].into_iter().max().unwrap()
-    }
 }
 
 pub fn ida(cube: Cube, max_depth: u8, h: impl Heuristic) -> Option<Vec<Move>> {
@@ -136,7 +66,7 @@ pub fn dfs(
     if depth >= max_depth {
         nodes.1 += 1;
         if cube == SOLVED { Some(path) } else { None }
-    } else if depth + h.lower_bound(&cube) >= max_depth {
+    } else if depth + h.lower_bound(&cube) > max_depth {
         None
     } else {
         if let [.., x, y] = &path[..] {
