@@ -1,6 +1,4 @@
-use super::cube::{
-    B, B2, BPRIME, Cube, D, D2, DPRIME, F, F2, FPRIME, L, L2, LPRIME, R, R2, RPRIME, U, U2, UPRIME,
-};
+use super::cube::Cube;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[rustfmt::skip]
@@ -22,6 +20,8 @@ impl Move {
     };
 
     pub fn to_cube(self) -> Cube {
+        use moves::*;
+
         match self {
             Move::U => U,
             Move::U2 => U2,
@@ -86,4 +86,143 @@ impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_str())
     }
+}
+
+impl std::ops::Mul<Move> for Move {
+    type Output = Cube;
+
+    fn mul(self, rhs: Move) -> Self::Output {
+        self.to_cube() * rhs.to_cube()
+    }
+}
+
+mod moves {
+    use super::Cube;
+
+    pub(super) const U: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [3, 0, 1, 2, 4, 5, 6, 7],
+    };
+
+    pub(super) const UPRIME: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [1, 2, 3, 0, 4, 5, 6, 7],
+    };
+
+    // rotate the right face clockwise
+    pub(super) const R: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11],
+        co: [0, 2, 1, 0, 0, 1, 2, 0],
+        cp: [0, 2, 6, 3, 4, 1, 5, 7],
+    };
+
+    pub(super) const RPRIME: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],
+        co: [0, 2, 1, 0, 0, 1, 2, 0],
+        cp: [0, 5, 1, 3, 4, 6, 2, 7],
+    };
+
+    pub(super) const L: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 4, 11, 5, 6, 3, 8, 9, 10, 7],
+        co: [1, 0, 0, 2, 2, 0, 0, 1],
+        cp: [4, 1, 2, 0, 7, 5, 6, 3],
+    };
+
+    pub(super) const LPRIME: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 7, 3, 5, 6, 11, 8, 9, 10, 4],
+        co: [1, 0, 0, 2, 2, 0, 0, 1],
+        cp: [3, 1, 2, 7, 0, 5, 6, 4],
+    };
+
+    pub(super) const D: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 8],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [0, 1, 2, 3, 5, 6, 7, 4],
+    };
+
+    pub(super) const DPRIME: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 3, 4, 5, 6, 7, 11, 8, 9, 10],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [0, 1, 2, 3, 7, 4, 5, 6],
+    };
+
+    pub(super) const F: Cube = Cube {
+        eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
+        ep: [0, 1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11],
+        co: [0, 0, 2, 1, 0, 0, 1, 2],
+        cp: [0, 1, 3, 7, 4, 5, 2, 6],
+    };
+
+    pub(super) const FPRIME: Cube = Cube {
+        eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
+        ep: [0, 1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11],
+        co: [0, 0, 2, 1, 0, 0, 1, 2],
+        cp: [0, 1, 6, 2, 4, 5, 7, 3],
+    };
+
+    pub(super) const B: Cube = Cube {
+        eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+        ep: [5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11],
+        co: [2, 1, 0, 0, 1, 2, 0, 0],
+        cp: [1, 5, 2, 3, 0, 4, 6, 7],
+    };
+
+    pub(super) const BPRIME: Cube = Cube {
+        eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+        ep: [4, 1, 2, 3, 8, 0, 6, 7, 5, 9, 10, 11],
+        co: [2, 1, 0, 0, 1, 2, 0, 0],
+        cp: [4, 0, 2, 3, 5, 1, 6, 7],
+    };
+
+    pub(super) const U2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [2, 3, 0, 1, 4, 5, 6, 7],
+    };
+
+    pub(super) const R2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 9, 2, 3, 4, 6, 5, 7, 8, 1, 10, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [0, 6, 5, 3, 4, 2, 1, 7],
+    };
+
+    pub(super) const L2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 11, 7, 5, 6, 4, 8, 9, 10, 3],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [7, 1, 2, 4, 3, 5, 6, 0],
+    };
+
+    pub(super) const D2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 8, 9],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [0, 1, 2, 3, 6, 7, 4, 5],
+    };
+
+    pub(super) const F2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [0, 1, 10, 3, 4, 5, 7, 6, 8, 9, 2, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [0, 1, 7, 6, 4, 5, 3, 2],
+    };
+
+    pub(super) const B2: Cube = Cube {
+        eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ep: [8, 1, 2, 3, 5, 4, 6, 7, 0, 9, 10, 11],
+        co: [0, 0, 0, 0, 0, 0, 0, 0],
+        cp: [5, 4, 2, 3, 1, 0, 6, 7],
+    };
 }

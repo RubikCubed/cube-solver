@@ -37,6 +37,14 @@ impl Corners {
         let p = Box::into_raw(table) as *mut Corners;
         unsafe { Box::from_raw(p) }
     }
+
+    pub fn index_to_coords(index: usize) -> (usize, usize) {
+        debug_assert!(index < CORNER_SIZE, "index {index} out of bounds");
+
+        let orientation = index / 40320;
+        let permutation = index % 40320;
+        (orientation, permutation)
+    }
 }
 
 impl Heuristic for &Corners {

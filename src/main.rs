@@ -6,6 +6,7 @@ mod mv;
 
 use crate::cube::*;
 use crate::heuristics::*;
+use crate::mv::Move::*;
 
 fn main() {
     let scramble = R * U * U * F * L * B;
@@ -14,7 +15,9 @@ fn main() {
 
     dbg!(
         scramble.corner_perm_coordinate(),
-        scramble.corner_orientation_coordinate()
+        scramble.corner_orientation_coordinate(),
+        scramble.co,
+        co_from_coord(scramble.corner_orientation_coordinate()),
     );
 
     let start = std::time::Instant::now();

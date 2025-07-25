@@ -55,6 +55,38 @@ pub fn ida(cube: Cube, max_depth: u8, h: impl Heuristic) -> Option<Vec<Move>> {
     None
 }
 
+pub fn co_from_coord(number: usize) -> [u8; 8] {
+    debug_assert!(number < 2187, "number {number} out of bounds");
+
+    let mut digits = [0; 8];
+    let mut n = number;
+    for i in (0..7).rev() {
+        digits[i] = (n % 3) as u8;
+        n /= 3;
+    }
+    let sum = digits.iter().take(7).sum::<u8>();
+    digits[7] = (3 - sum % 3) % 3;
+    digits
+}
+
+static FACTORIALS: [usize; 8] = [0, 1, 2, 6, 24, 120, 720, 5040];
+
+pub fn cp_from_coord(number: usize) -> [u8; 8] {
+    debug_assert!(number < 40320, "number {number} out of bounds");
+
+    let mut lehmer_code = [0; 8];
+    let mut n = number;
+    for i in (1..8).rev() {
+        let digit = n / FACTORIALS[i];
+
+        debug_assert!(digit <= i, "{digit} should be <= {i}");
+
+        lehmer_code[i] = digit as u8;
+        n %= FACTORIALS[i];
+    }
+    lehmer_code
+}
+
 pub fn dfs(
     depth: u8,
     path: Vec<Move>,
@@ -216,134 +248,6 @@ pub const SUPERFLIP: Cube = Cube {
     cp: [0, 1, 2, 3, 4, 5, 6, 7],
 };
 
-// rotate the top face clockwise
-pub const U: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [3, 0, 1, 2, 4, 5, 6, 7],
-};
-
-pub const UPRIME: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [1, 2, 3, 0, 4, 5, 6, 7],
-};
-
-// rotate the right face clockwise
-pub const R: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11],
-    co: [0, 2, 1, 0, 0, 1, 2, 0],
-    cp: [0, 2, 6, 3, 4, 1, 5, 7],
-};
-
-pub const RPRIME: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],
-    co: [0, 2, 1, 0, 0, 1, 2, 0],
-    cp: [0, 5, 1, 3, 4, 6, 2, 7],
-};
-
-pub const L: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 4, 11, 5, 6, 3, 8, 9, 10, 7],
-    co: [1, 0, 0, 2, 2, 0, 0, 1],
-    cp: [4, 1, 2, 0, 7, 5, 6, 3],
-};
-
-pub const LPRIME: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 7, 3, 5, 6, 11, 8, 9, 10, 4],
-    co: [1, 0, 0, 2, 2, 0, 0, 1],
-    cp: [3, 1, 2, 7, 0, 5, 6, 4],
-};
-
-pub const D: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 8],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 1, 2, 3, 5, 6, 7, 4],
-};
-
-pub const DPRIME: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 3, 4, 5, 6, 7, 11, 8, 9, 10],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 1, 2, 3, 7, 4, 5, 6],
-};
-
-pub const F: Cube = Cube {
-    eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
-    ep: [0, 1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11],
-    co: [0, 0, 2, 1, 0, 0, 1, 2],
-    cp: [0, 1, 3, 7, 4, 5, 2, 6],
-};
-
-pub const FPRIME: Cube = Cube {
-    eo: [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0],
-    ep: [0, 1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11],
-    co: [0, 0, 2, 1, 0, 0, 1, 2],
-    cp: [0, 1, 6, 2, 4, 5, 7, 3],
-};
-
-pub const B: Cube = Cube {
-    eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
-    ep: [5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11],
-    co: [2, 1, 0, 0, 1, 2, 0, 0],
-    cp: [1, 5, 2, 3, 0, 4, 6, 7],
-};
-
-pub const BPRIME: Cube = Cube {
-    eo: [1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
-    ep: [4, 1, 2, 3, 8, 0, 6, 7, 5, 9, 10, 11],
-    co: [2, 1, 0, 0, 1, 2, 0, 0],
-    cp: [4, 0, 2, 3, 5, 1, 6, 7],
-};
-
-pub const U2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [2, 3, 0, 1, 4, 5, 6, 7],
-};
-
-pub const R2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 9, 2, 3, 4, 6, 5, 7, 8, 1, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 6, 5, 3, 4, 2, 1, 7],
-};
-
-pub const L2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 11, 7, 5, 6, 4, 8, 9, 10, 3],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [7, 1, 2, 4, 3, 5, 6, 0],
-};
-
-pub const D2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 8, 9],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 1, 2, 3, 6, 7, 4, 5],
-};
-
-pub const F2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [0, 1, 10, 3, 4, 5, 7, 6, 8, 9, 2, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [0, 1, 7, 6, 4, 5, 3, 2],
-};
-
-pub const B2: Cube = Cube {
-    eo: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ep: [8, 1, 2, 3, 5, 4, 6, 7, 0, 9, 10, 11],
-    co: [0, 0, 0, 0, 0, 0, 0, 0],
-    cp: [5, 4, 2, 3, 1, 0, 6, 7],
-};
-
 impl Cube {
     pub fn apply(&self, mv: &Self) -> Self {
         Cube {
@@ -413,6 +317,14 @@ impl std::ops::Mul for Cube {
     }
 }
 
+impl std::ops::Mul<Move> for Cube {
+    type Output = Cube;
+
+    fn mul(self, rhs: Move) -> Self::Output {
+        self.apply(&rhs.to_cube())
+    }
+}
+
 impl std::ops::Mul<Move> for &Cube {
     type Output = Cube;
 
@@ -458,6 +370,7 @@ mod tests {
         Color::{self, *},
         *,
     };
+    use crate::mv::Move::*;
 
     const SOLVED_COLORS: [Color; 54] = [
         White, White, White, White, White, White, White, White, White, Orange, Orange, Orange,
@@ -521,143 +434,43 @@ mod tests {
     }
 
     #[test]
-    fn l() {
-        assert_eq!(SOLVED.apply(&L).to_facelets(), L_COLORS);
+    fn identity() {
+        assert_eq!(SOLVED * R, R.to_cube());
     }
 
     #[test]
-    fn lprime() {
-        assert_eq!(
-            SOLVED.apply(&LPRIME).to_facelets(),
-            SOLVED.apply(&L).apply(&L).apply(&L).to_facelets(),
-        );
+    fn move_colors() {
+        let pairs = [
+            (U, U_COLORS),
+            (D, D_COLORS),
+            (L, L_COLORS),
+            (R, R_COLORS),
+            (F, F_COLORS),
+            (B, B_COLORS),
+        ];
+
+        for (mv, colors) in pairs {
+            assert_eq!(mv.to_cube().to_facelets(), colors);
+        }
     }
 
     #[test]
-    fn r() {
-        assert_eq!(SOLVED.apply(&R).to_facelets(), R_COLORS);
-    }
-
-    #[test]
-    fn rprime() {
-        assert_eq!(
-            SOLVED.apply(&RPRIME).to_facelets(),
-            SOLVED.apply(&R).apply(&R).apply(&R).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn u() {
-        assert_eq!(SOLVED.apply(&U).to_facelets(), U_COLORS);
-    }
-
-    #[test]
-    fn uprime() {
-        assert_eq!(
-            SOLVED.apply(&UPRIME).to_facelets(),
-            SOLVED.apply(&U).apply(&U).apply(&U).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn d() {
-        assert_eq!(SOLVED.apply(&D).to_facelets(), D_COLORS);
-    }
-
-    #[test]
-    fn dprime() {
-        assert_eq!(
-            SOLVED.apply(&DPRIME).to_facelets(),
-            SOLVED.apply(&D).apply(&D).apply(&D).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn f() {
-        assert_eq!(SOLVED.apply(&F).to_facelets(), F_COLORS);
-    }
-
-    #[test]
-    fn fprime() {
-        assert_eq!(
-            SOLVED.apply(&FPRIME).to_facelets(),
-            SOLVED.apply(&F).apply(&F).apply(&F).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn b() {
-        assert_eq!(SOLVED.apply(&B).to_facelets(), B_COLORS);
-    }
-
-    #[test]
-    fn bprime() {
-        assert_eq!(
-            SOLVED.apply(&BPRIME).to_facelets(),
-            SOLVED.apply(&B).apply(&B).apply(&B).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn u2() {
-        assert_eq!(
-            (SOLVED * U2).to_facelets(),
-            (SOLVED * UPRIME * UPRIME).to_facelets()
-        )
-    }
-
-    #[test]
-    fn d2() {
-        assert_eq!(
-            SOLVED.apply(&D).apply(&D).to_facelets(),
-            SOLVED.apply(&DPRIME).apply(&DPRIME).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn r2() {
-        assert_eq!(
-            SOLVED.apply(&R).apply(&R).to_facelets(),
-            SOLVED.apply(&RPRIME).apply(&RPRIME).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn l2() {
-        assert_eq!(
-            SOLVED.apply(&L).apply(&L).to_facelets(),
-            SOLVED.apply(&LPRIME).apply(&LPRIME).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn f2() {
-        assert_eq!(
-            SOLVED.apply(&F).apply(&F).to_facelets(),
-            SOLVED.apply(&FPRIME).apply(&FPRIME).to_facelets(),
-        );
-    }
-
-    #[test]
-    fn b2() {
-        assert_eq!(
-            SOLVED.apply(&B).apply(&B).to_facelets(),
-            SOLVED.apply(&BPRIME).apply(&BPRIME).to_facelets(),
-        );
+    fn move_inversions() {
+        let pairs = [(U, U3), (D, D3), (L, L3), (R, R3), (F, F3), (B, B3)];
+        for (mv, mv3) in pairs {
+            assert_eq!(mv.to_cube(), mv3 * mv3 * mv3);
+        }
     }
 
     #[test]
     fn full_r_rotation() {
-        assert_eq!(
-            SOLVED.apply(&R).apply(&R).apply(&R).apply(&R).to_facelets(),
-            SOLVED_COLORS
-        )
+        assert_eq!(SOLVED * R * R2 * R, SOLVED)
     }
 
     #[test]
     fn superflip() {
         #[rustfmt::skip]
-        let superflip_moves: Cube = U * R2 * F * B * R * B2 * R * U2 * L * B2 * R * UPRIME * DPRIME * R2 * F * RPRIME * L * B2 * U2 * F2;
+        let superflip_moves: Cube = U * R2 * F * B * R * B2 * R * U2 * L * B2 * R * U3 * D3 * R2 * F * R3 * L * B2 * U2 * F2;
 
         assert_eq!(superflip_moves.to_facelets(), SUPERFLIP.to_facelets())
     }
@@ -683,6 +496,31 @@ mod tests {
                 scramble.corner_orientation_coordinate()
             ),
             (4467, 2050)
+        );
+    }
+
+    #[test]
+    fn index_to_coords() {
+        use crate::heuristics::Corners;
+
+        let scramble = R * U * U * F * L * B;
+        let coords = (
+            scramble.corner_orientation_coordinate(),
+            scramble.corner_perm_coordinate(),
+        );
+
+        let index = Corners::coord(&scramble);
+
+        assert_eq!(coords, Corners::index_to_coords(index));
+    }
+
+    #[test]
+    fn coord_to_co() {
+        let scramble = R * U * U * F * L * B;
+
+        assert_eq!(
+            scramble.co,
+            co_from_coord(scramble.corner_orientation_coordinate())
         );
     }
 }
