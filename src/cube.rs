@@ -84,7 +84,17 @@ pub fn cp_from_coord(number: usize) -> [u8; 8] {
         lehmer_code[i] = digit as u8;
         n %= FACTORIALS[i];
     }
-    lehmer_code
+
+    let mut cp = [0; 8];
+    let mut remaining: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
+
+    for i in (0..=7).rev() {
+        let digit = lehmer_code[i];
+        let index = remaining[i - digit as usize];
+        cp[i] = index;
+        remaining.remove(i - digit as usize);
+    }
+    cp
 }
 
 pub fn dfs(
@@ -522,5 +532,19 @@ mod tests {
             scramble.co,
             co_from_coord(scramble.corner_orientation_coordinate())
         );
+    }
+
+    #[test]
+    fn corner_permutation_round_trip() {
+        use crate::heuristics::Corners;
+
+        let scramble = R * U * U * F * L * B;
+
+        let index = Corners::coord(&scramble);
+
+        let (_, cpcoord) = Corners::index_to_coords(index);
+        let cp_state: [u8; 8] = cp_from_coord(cpcoord);
+
+        assert_eq!(cp_state, scramble.cp);
     }
 }
