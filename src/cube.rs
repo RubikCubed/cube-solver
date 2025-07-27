@@ -38,10 +38,10 @@ pub fn ida(cube: Cube, max_depth: u8, h: impl Heuristic) -> Option<Vec<Move>> {
         let elapsed = start.elapsed();
         let (branches, leaves) = nodes;
         eprintln!(
-            "searched {} nodes in {:?} at {:.0} nodes/s, branching factor: {:.2}",
+            "searched {} nodes in {:.2?} at {:.2}M nodes/s, branching factor: {:.2}",
             branches + leaves,
             elapsed,
-            (branches + leaves) as f64 / elapsed.as_secs_f64(),
+            (branches + leaves) as f64 / elapsed.as_secs_f64() / 1_000_000.0,
             if branches != 0 {
                 (branches + leaves - 1) as f64 / branches as f64
             } else {
@@ -112,7 +112,7 @@ pub fn dfs(
         None
     } else {
         if let [.., x, y] = &path[..] {
-            if x.cancels(*y) {
+            if x.redundant(*y) {
                 return None;
             }
         }
@@ -546,5 +546,19 @@ mod tests {
         let cp_state: [u8; 8] = cp_from_coord(cpcoord);
 
         assert_eq!(cp_state, scramble.cp);
+    }
+
+    #[test]
+    fn corner_orientation_round_trip() {
+        use crate::heuristics::Corners;
+
+        let scramble = R * U * U * F * L * B;
+
+        let index = Corners::coord(&scramble);
+
+        let (cocoord, _) = Corners::index_to_coords(index);
+        let co_state: [u8; 8] = co_from_coord(cocoord);
+
+        assert_eq!(co_state, scramble.co);
     }
 }

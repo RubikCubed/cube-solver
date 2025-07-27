@@ -80,6 +80,32 @@ impl Move {
             _ => false,
         }
     }
+
+    #[rustfmt::skip]
+    pub fn redundant(self, other: Self) -> bool {
+        use Move::*;
+        match (self, other) {
+              (U, U) | (U, U2) | (U, U3)
+            | (U2, U) | (U2, U2) | (U2, U3)
+            | (U3, U) | (U3, U2) | (U3, U3)
+            | (R, R) | (R, R2) | (R, R3)
+            | (R2, R) | (R2, R2) | (R2, R3)
+            | (R3, R) | (R3, R2) | (R3, R3)
+            | (F, F) | (F, F2) | (F, F3)
+            | (F2, F) | (F2, F2) | (F2, F3)
+            | (F3, F) | (F3, F2) | (F3, F3)
+            | (L, L) | (L, L2) | (L, L3)
+            | (L2, L) | (L2, L2) | (L2, L3)
+            | (L3, L) | (L3, L2) | (L3, L3)
+            | (D, D) | (D, D2) | (D, D3)
+            | (D2, D) | (D2, D2) | (D2, D3)
+            | (D3, D) | (D3, D2) | (D3, D3)
+            | (B, B) | (B, B2) | (B, B3)
+            | (B2, B) | (B2, B2) | (B2, B3)
+            | (B3, B) | (B3, B2) | (B3, B3) => true,
+            _ => false,
+        }
+    }
 }
 
 impl std::fmt::Display for Move {
