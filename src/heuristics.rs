@@ -106,8 +106,7 @@ impl Corners {
         let elapsed = start.elapsed();
         eprintln!("time taken to generate corner lookup table: {:?}", elapsed);
 
-        let p = Box::into_raw(table) as *mut Corners;
-        unsafe { Box::from_raw(p) }
+        Corners::new(table)
     }
 
     pub fn index_to_coords(index: usize) -> (usize, usize) {
