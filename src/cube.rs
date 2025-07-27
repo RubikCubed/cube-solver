@@ -103,8 +103,12 @@ pub fn cp_from_coord(number: usize) -> [u8; 8] {
 use crate::puzzle::Puzzle;
 
 impl Puzzle for Cube {
+    fn solved() -> Self {
+        SOLVED
+    }
+
     fn is_solved(&self) -> bool {
-        self.is_solved()
+        self == &Self::solved()
     }
 }
 
@@ -316,10 +320,6 @@ impl Cube {
             .iter()
             .take(7)
             .fold(0, |acc, &co| 3 * acc + co as usize)
-    }
-
-    pub fn is_solved(&self) -> bool {
-        self == &SOLVED
     }
 }
 
