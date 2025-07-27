@@ -15,12 +15,13 @@ fn main() {
     scramble.print_net();
 
     let start = std::time::Instant::now();
-    let corners = Corners::load_pruning_table();
+    let corners = load_pruning_table();
+    let edges = EdgeOrientation::generate();
     eprintln!("Loaded corner pruning table in {:?}", start.elapsed());
 
     let start = std::time::Instant::now();
 
-    if let Some(path) = ida(scramble, 20, (EOBound, corners.as_ref())) {
+    if let Some(path) = ida(scramble, 20, (edges.as_ref(), corners.as_ref())) {
         let elapsed = start.elapsed();
         eprintln!("Elapsed: {:?}", elapsed);
         println!(
@@ -30,5 +31,15 @@ fn main() {
                 .collect::<Vec<_>>()
                 .join(" ")
         );
+    }
+}
+
+pub fn load_pruning_table() -> Box<Corners> {
+    match std::fs::read("pruning_table.bin") {
+        Ok(data) => Corners::new(data.try_into().unwrap()),
+        Err(e) => {
+            eprintln!("Error reading pruning table: {}", e);
+            Corners::generate()
+        }
     }
 }
