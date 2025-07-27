@@ -1,12 +1,12 @@
 use crate::cube::{Cube, co_from_coord, cp_from_coord};
 
-pub trait Heuristic: Copy {
-    fn lower_bound(self, state: &Cube) -> u8;
+pub trait Heuristic<T>: Copy {
+    fn lower_bound(self, state: &T) -> u8;
 }
 
 #[derive(Clone, Copy)]
 pub struct ZeroBound;
-impl Heuristic for ZeroBound {
+impl Heuristic<Cube> for ZeroBound {
     fn lower_bound(self, _state: &Cube) -> u8 {
         0
     }
@@ -14,7 +14,7 @@ impl Heuristic for ZeroBound {
 
 #[derive(Clone, Copy)]
 pub struct EOBound;
-impl Heuristic for EOBound {
+impl Heuristic<Cube> for EOBound {
     fn lower_bound(self, state: &Cube) -> u8 {
         state.eo.iter().sum::<u8>() % 4
     }
@@ -118,7 +118,7 @@ impl Corners {
     }
 }
 
-impl Heuristic for &Corners {
+impl Heuristic<Cube> for &Corners {
     fn lower_bound(self, state: &Cube) -> u8 {
         let index = Corners::coord(state);
         self.0[index]
@@ -126,12 +126,12 @@ impl Heuristic for &Corners {
 }
 
 #[rustfmt::skip]
-impl<H0, H1> Heuristic for (H0, H1) 
+impl<T, H0, H1> Heuristic<T> for (H0, H1) 
 where 
-    H0: Heuristic,
-    H1: Heuristic,
+    H0: Heuristic<T>,
+    H1: Heuristic<T>,
 {
-    fn lower_bound(self, state: &Cube) -> u8 {
+    fn lower_bound(self, state: &T) -> u8 {
         let (h0, h1) = self;
         [
             h0.lower_bound(state),
@@ -141,13 +141,13 @@ where
 }
 
 #[rustfmt::skip]
-impl<H0, H1, H2> Heuristic for (H0, H1, H2) 
+impl<T, H0, H1, H2> Heuristic<T> for (H0, H1, H2) 
 where 
-    H0: Heuristic,
-    H1: Heuristic,
-    H2: Heuristic,
+    H0: Heuristic<T>,
+    H1: Heuristic<T>,
+    H2: Heuristic<T>,
 {
-    fn lower_bound(self, state: &Cube) -> u8 {
+    fn lower_bound(self, state: &T) -> u8 {
         let (h0, h1, h2) = self;
         [
             h0.lower_bound(state),
@@ -158,14 +158,14 @@ where
 }
 
 #[rustfmt::skip]
-impl<H0, H1, H2, H3> Heuristic for (H0, H1, H2, H3) 
+impl<T, H0, H1, H2, H3> Heuristic<T> for (H0, H1, H2, H3) 
 where 
-    H0: Heuristic,
-    H1: Heuristic,
-    H2: Heuristic,
-    H3: Heuristic,
+    H0: Heuristic<T>,
+    H1: Heuristic<T>,
+    H2: Heuristic<T>,
+    H3: Heuristic<T>,
 {
-    fn lower_bound(self, state: &Cube) -> u8 {
+    fn lower_bound(self, state: &T) -> u8 {
         let (h0, h1, h2, h3) = self;
         [
             h0.lower_bound(state),

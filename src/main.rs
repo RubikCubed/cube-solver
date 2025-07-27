@@ -3,6 +3,7 @@
 mod cube;
 mod heuristics;
 mod mv;
+mod puzzle;
 
 use crate::cube::*;
 use crate::heuristics::*;
@@ -19,7 +20,7 @@ fn main() {
 
     let start = std::time::Instant::now();
 
-    if let Some(path) = ida(scramble, 20, corners.as_ref()) {
+    if let Some(path) = ida(scramble, 20, (EOBound, corners.as_ref())) {
         let elapsed = start.elapsed();
         eprintln!("Elapsed: {:?}", elapsed);
         println!(

@@ -27,14 +27,17 @@ pub enum Color {
     Green,
 }
 
-pub fn ida(cube: Cube, max_depth: u8, h: impl Heuristic) -> Option<Vec<Move>> {
+pub fn ida<T: Puzzle + Clone>(puzzle: T, max_depth: u8, h: impl Heuristic<T>) -> Option<Vec<Move>>
+where
+    for<'a> &'a T: std::ops::Mul<Move, Output = T>,
+{
     for depth in 0..=max_depth {
         eprintln!("starting depth {depth}...");
         let start = std::time::Instant::now();
         let mut nodes = (0, 0);
 
-        let cube = cube.clone();
-        let path = dfs(0, Vec::new(), depth, cube, &mut nodes, h);
+        let puzzle = puzzle.clone();
+        let path = dfs(0, Vec::new(), depth, puzzle, &mut nodes, h);
         let elapsed = start.elapsed();
         let (branches, leaves) = nodes;
         eprintln!(
@@ -97,18 +100,29 @@ pub fn cp_from_coord(number: usize) -> [u8; 8] {
     cp
 }
 
-pub fn dfs(
+use crate::puzzle::Puzzle;
+
+impl Puzzle for Cube {
+    fn is_solved(&self) -> bool {
+        self.is_solved()
+    }
+}
+
+pub fn dfs<T: Puzzle>(
     depth: u8,
     path: Vec<Move>,
     max_depth: u8,
-    cube: Cube,
+    puzzle: T,
     nodes: &mut (u64, u64),
-    h: impl Heuristic,
-) -> Option<Vec<Move>> {
+    h: impl Heuristic<T>,
+) -> Option<Vec<Move>>
+where
+    for<'a> &'a T: std::ops::Mul<Move, Output = T>,
+{
     if depth >= max_depth {
         nodes.1 += 1;
-        if cube == SOLVED { Some(path) } else { None }
-    } else if depth + h.lower_bound(&cube) > max_depth {
+        if puzzle.is_solved() { Some(path) } else { None }
+    } else if depth + h.lower_bound(&puzzle) > max_depth {
         None
     } else {
         if let [.., x, y] = &path[..] {
@@ -122,7 +136,7 @@ pub fn dfs(
         Move::ALL.into_iter().find_map(|m| {
             let mut path = path.clone();
             path.push(*m);
-            dfs(depth + 1, path, max_depth, &cube * *m, nodes, h)
+            dfs(depth + 1, path, max_depth, &puzzle * *m, nodes, h)
         })
     }
 }
@@ -302,6 +316,10 @@ impl Cube {
             .iter()
             .take(7)
             .fold(0, |acc, &co| 3 * acc + co as usize)
+    }
+
+    pub fn is_solved(&self) -> bool {
+        self == &SOLVED
     }
 }
 
