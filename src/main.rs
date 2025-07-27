@@ -13,7 +13,9 @@ fn main() {
     let scramble = SUPERFLIP;
     scramble.print_net();
 
-    let corners = Corners::generate();
+    let start = std::time::Instant::now();
+    let corners = Corners::load_pruning_table();
+    eprintln!("Loaded corner pruning table in {:?}", start.elapsed());
 
     let start = std::time::Instant::now();
 

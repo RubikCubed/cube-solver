@@ -30,7 +30,27 @@ impl Corners {
         cube.corner_orientation_coordinate() * 40320 + cube.corner_perm_coordinate()
     }
 
+    pub fn bytes(&self) -> &[u8] {
+        &self.0
+    }
+
+    pub fn new(table: Box<[u8; CORNER_SIZE]>) -> Box<Self> {
+        let p = Box::into_raw(table) as *mut Corners;
+        unsafe { Box::from_raw(p) }
+    }
+
+    pub fn load_pruning_table() -> Box<Corners> {
+        match std::fs::read("pruning_table.bin") {
+            Ok(data) => Corners::new(data.try_into().unwrap()),
+            Err(e) => {
+                eprintln!("Error reading pruning table: {}", e);
+                Corners::generate()
+            }
+        }
+    }
+
     pub fn generate() -> Box<Corners> {
+        eprintln!("Generating corner pruning table...");
         let mut table: Box<[u8; CORNER_SIZE]> = vec![0; CORNER_SIZE].try_into().unwrap();
 
         let start = std::time::Instant::now();
