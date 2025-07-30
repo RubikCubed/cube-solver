@@ -1,4 +1,7 @@
-use crate::cube::{Cube, co_from_coord, cp_from_coord, eo_from_coord};
+use crate::{
+    cube::{Cube, co_from_coord, cp_from_coord},
+    puzzle::Puzzle,
+};
 
 pub trait Heuristic<T>: Copy {
     fn lower_bound(self, state: &T) -> u8;
@@ -17,85 +20,6 @@ pub struct EOBound;
 impl Heuristic<Cube> for EOBound {
     fn lower_bound(self, state: &Cube) -> u8 {
         state.eo.iter().sum::<u8>() % 4
-    }
-}
-
-const EDGE_SIZE: usize = 2usize.pow(11);
-pub struct EdgeOrientation([u8; EDGE_SIZE]);
-impl Heuristic<Cube> for &EdgeOrientation {
-    fn lower_bound(self, state: &Cube) -> u8 {
-        let index = EdgeOrientation::coord(state);
-        self.0[index]
-    }
-}
-
-impl EdgeOrientation {
-    pub fn new(table: Box<[u8; EDGE_SIZE]>) -> Box<Self> {
-        let p = Box::into_raw(table) as *mut EdgeOrientation;
-        unsafe { Box::from_raw(p) }
-    }
-
-    pub fn coord(cube: &Cube) -> usize {
-        cube.edge_orientation_coordinate()
-    }
-
-    pub fn generate() -> Box<Self> {
-        eprintln!("Generating edge pruning table...");
-        let mut table: Box<[u8; EDGE_SIZE]> = vec![0; EDGE_SIZE].try_into().unwrap();
-
-        let start = std::time::Instant::now();
-
-        let mut total_filled = 1;
-
-        // all the face turns can be set to 1
-        for mv in crate::mv::Move::ALL {
-            let new_state = mv.to_cube();
-            let index = EdgeOrientation::coord(&new_state);
-            table[index] = 1;
-            total_filled += 1;
-        }
-
-        'depth: for depth in 2.. {
-            for index in 1..EDGE_SIZE {
-                if total_filled >= EDGE_SIZE {
-                    eprintln!("Filled all entries in the table, stopping at depth {depth}");
-                    break 'depth;
-                }
-                let moves_to_solve = table[index];
-
-                if moves_to_solve != depth - 1 {
-                    continue;
-                }
-
-                let eo = eo_from_coord(index);
-
-                let cube = Cube {
-                    eo,
-                    ep: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                    co: [0; 8],
-                    cp: [0, 1, 2, 3, 4, 5, 6, 7],
-                };
-
-                // apply all moves to the current state, update the new indexes if they aren't set
-                for mv in crate::mv::Move::ALL {
-                    let new_state = cube.apply(&mv.to_cube());
-                    let new_index = EdgeOrientation::coord(&new_state);
-                    if new_index == 0 {
-                        continue;
-                    }
-
-                    if table[new_index] == 0 {
-                        table[new_index] = depth;
-                        total_filled += 1;
-                    }
-                }
-            }
-        }
-
-        let elapsed = start.elapsed();
-        eprintln!("time taken to generate edge lookup table: {:?}", elapsed);
-
-        EdgeOrientation::new(table)
     }
 }
 

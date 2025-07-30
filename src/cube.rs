@@ -72,19 +72,6 @@ pub fn co_from_coord(number: usize) -> [u8; 8] {
     digits
 }
 
-pub fn eo_from_coord(number: usize) -> [u8; 12] {
-    debug_assert!(number < 2usize.pow(11), "number {number} out of bounds");
-
-    let mut digits = [0; 12];
-    let mut n = number;
-    for i in (0..11).rev() {
-        digits[i] = (n % 2) as u8;
-        n /= 2;
-    }
-    digits[11] = (2 - digits.iter().take(11).sum::<u8>() % 2) % 2;
-    digits
-}
-
 static FACTORIALS: [usize; 8] = [0, 1, 2, 6, 24, 120, 720, 5040];
 
 pub fn cp_from_coord(number: usize) -> [u8; 8] {
@@ -333,13 +320,6 @@ impl Cube {
             .iter()
             .take(7)
             .fold(0, |acc, &co| 3 * acc + co as usize)
-    }
-
-    pub fn edge_orientation_coordinate(&self) -> usize {
-        self.eo
-            .iter()
-            .take(11)
-            .fold(0, |acc, &eo| 2 * acc + eo as usize)
     }
 }
 
