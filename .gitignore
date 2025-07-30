@@ -21,4 +21,4 @@ target
 #.idea/
 
 # pruning table
-pruning_table.bin
+*.bin
