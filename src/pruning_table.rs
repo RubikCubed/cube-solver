@@ -131,3 +131,177 @@ impl Coordinate<Cube> for EO {
         cube
     }
 }
+
+pub struct CornerOrientation;
+pub struct CornerPermutation;
+
+impl Coordinate<Cube> for CornerOrientation {
+    const MAX: usize = 2187;
+
+    fn to_coord(state: &Cube) -> usize {
+        state
+            .co
+            .iter()
+            .take(7)
+            .fold(0, |acc, &co| 3 * acc + co as usize)
+    }
+
+    fn from_coord(coord: usize) -> Cube {
+        debug_assert!(coord < Self::MAX, "number {coord} out of bounds");
+
+        let mut orientation = [0; 8];
+        let mut n = coord;
+        for i in (0..7).rev() {
+            orientation[i] = (n % 3) as u8;
+            n /= 3;
+        }
+        let sum = orientation.iter().take(7).sum::<u8>();
+        orientation[7] = (3 - sum % 3) % 3;
+
+        let mut cube = Cube::solved();
+        cube.co = orientation;
+
+        cube
+    }
+}
+
+impl Coordinate<Cube> for CornerPermutation {
+    const MAX: usize = 40320;
+
+    fn to_coord(state: &Cube) -> usize {
+        let mut x = 0;
+        for i in (1..8).rev() {
+            let mut s = 0;
+            for j in (0..i).rev() {
+                if state.cp[j] > state.cp[i] {
+                    s += 1;
+                }
+            }
+            x = (x + s) * i;
+        }
+        x
+    }
+
+    fn from_coord(coord: usize) -> Cube {
+        const FACTORIALS: [usize; 8] = [0, 1, 2, 6, 24, 120, 720, 5040];
+
+        debug_assert!(coord < 40320, "number {coord} out of bounds");
+
+        let mut lehmer_code = [0; 8];
+        let mut n = coord;
+        for i in (1..8).rev() {
+            let digit = n / FACTORIALS[i];
+
+            debug_assert!(digit <= i, "{digit} should be <= {i}");
+
+            lehmer_code[i] = digit as u8;
+            n %= FACTORIALS[i];
+        }
+
+        let mut cp = [0; 8];
+        let mut remaining: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
+
+        for i in (0..=7).rev() {
+            let digit = lehmer_code[i];
+            let index = remaining[i - digit as usize];
+            cp[i] = index;
+            remaining.remove(i - digit as usize);
+        }
+
+        let mut cube = Cube::solved();
+        cube.cp = cp;
+        cube
+    }
+}
+
+/*
+impl<S, C0, C1> Coordinate<S> for (C0, C1)
+where
+    C0: Coordinate<S>,
+    C1: Coordinate<S>,
+{
+    const MAX: usize = C0::MAX * C1::MAX;
+
+    fn to_coord(state: &S) -> usize {
+        C0::to_coord(state) * C1::MAX + C1::to_coord(state)
+    }
+
+    fn from_coord(coord: usize) -> S {
+        let c0 = coord / C1::MAX;
+        let c1 = coord % C1::MAX;
+        (C0::from_coord(c0), C1::from_coord(c1))
+    }
+}
+*/
+impl Coordinate<Cube> for (CornerOrientation, CornerPermutation) {
+    const MAX: usize = CornerOrientation::MAX * CornerPermutation::MAX;
+
+    fn to_coord(state: &Cube) -> usize {
+        CornerOrientation::to_coord(state) * CornerPermutation::MAX
+            + CornerPermutation::to_coord(state)
+    }
+
+    fn from_coord(coord: usize) -> Cube {
+        let c0 = coord / CornerPermutation::MAX;
+        let c1 = coord % CornerPermutation::MAX;
+        let (mut co, cp) = (
+            CornerOrientation::from_coord(c0),
+            CornerPermutation::from_coord(c1),
+        );
+
+        co.cp = cp.cp;
+        co
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cube::Cube;
+    use crate::mv::Move::*;
+
+    #[test]
+    fn corners_solved() {
+        let solved = Cube::solved();
+        assert_eq!(
+            (
+                CornerPermutation::to_coord(&solved),
+                CornerOrientation::to_coord(&solved)
+            ),
+            (0, 0)
+        );
+    }
+
+    #[test]
+    fn corner_coordinates() {
+        let scramble = R * U * U * F * L * B;
+
+        assert_eq!(
+            (
+                CornerPermutation::to_coord(&scramble),
+                CornerOrientation::to_coord(&scramble)
+            ),
+            (4467, 2050)
+        );
+    }
+
+    #[test]
+    fn corner_permutation_round_trip() {
+        let scramble = R * U * U * F * L * B;
+
+        let index = CornerPermutation::to_coord(&scramble);
+        let reconstructed_cube = CornerPermutation::from_coord(index);
+
+        assert_eq!(reconstructed_cube.cp, scramble.cp);
+    }
+
+    #[test]
+    fn corner_orientation_round_trip() {
+        let scramble = R * U * U * F * L * B;
+
+        let index = CornerOrientation::to_coord(&scramble);
+        let reconstructed_cube = CornerOrientation::from_coord(index);
+
+        assert_eq!(reconstructed_cube.co, scramble.co);
+    }
+}

@@ -8,7 +8,6 @@ mod pruning_table;
 mod puzzle;
 
 use cube::*;
-use heuristics::*;
 use pruning_table::*;
 
 use puzzle::Puzzle;
@@ -19,15 +18,25 @@ fn main() {
 
     scramble.print_net();
 
+    eprintln!("Loading EO pruning table...");
     let start = std::time::Instant::now();
 
-    eprintln!("Loading EO pruning table...");
     let eo_pruning_table: Box<PruningTable<Cube, EO>> = load_pruning_table("eo_pruning_table.bin");
     eprintln!("Loaded EO pruning table in {:?}", start.elapsed());
 
+    eprintln!("Loading Corner pruning table...");
+    let start = std::time::Instant::now();
+    let corner_pruning_table: Box<PruningTable<Cube, (CornerOrientation, CornerPermutation)>> =
+        load_pruning_table("corner_pruning_table.bin");
+    eprintln!("Loaded corner pruning table in {:?}", start.elapsed());
+
     let start = std::time::Instant::now();
 
-    if let Some(path) = ida(scramble, 20, eo_pruning_table.as_ref()) {
+    if let Some(path) = ida(
+        scramble,
+        20,
+        (corner_pruning_table.as_ref(), eo_pruning_table.as_ref()),
+    ) {
         let elapsed = start.elapsed();
         eprintln!("Elapsed: {:?}", elapsed);
         println!(

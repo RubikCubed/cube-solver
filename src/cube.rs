@@ -58,48 +58,6 @@ where
     None
 }
 
-pub fn co_from_coord(number: usize) -> [u8; 8] {
-    debug_assert!(number < 2187, "number {number} out of bounds");
-
-    let mut digits = [0; 8];
-    let mut n = number;
-    for i in (0..7).rev() {
-        digits[i] = (n % 3) as u8;
-        n /= 3;
-    }
-    let sum = digits.iter().take(7).sum::<u8>();
-    digits[7] = (3 - sum % 3) % 3;
-    digits
-}
-
-static FACTORIALS: [usize; 8] = [0, 1, 2, 6, 24, 120, 720, 5040];
-
-pub fn cp_from_coord(number: usize) -> [u8; 8] {
-    debug_assert!(number < 40320, "number {number} out of bounds");
-
-    let mut lehmer_code = [0; 8];
-    let mut n = number;
-    for i in (1..8).rev() {
-        let digit = n / FACTORIALS[i];
-
-        debug_assert!(digit <= i, "{digit} should be <= {i}");
-
-        lehmer_code[i] = digit as u8;
-        n %= FACTORIALS[i];
-    }
-
-    let mut cp = [0; 8];
-    let mut remaining: Vec<u8> = vec![0, 1, 2, 3, 4, 5, 6, 7];
-
-    for i in (0..=7).rev() {
-        let digit = lehmer_code[i];
-        let index = remaining[i - digit as usize];
-        cp[i] = index;
-        remaining.remove(i - digit as usize);
-    }
-    cp
-}
-
 use crate::puzzle::Puzzle;
 
 impl Puzzle for Cube {
@@ -300,27 +258,6 @@ impl Cube {
     pub fn to_facelets(&self) -> [Color; 54] {
         std::array::from_fn(|i| associate_facelet(i as u8).to_color(self))
     }
-
-    pub fn corner_perm_coordinate(&self) -> usize {
-        let mut x = 0;
-        for i in (1..8).rev() {
-            let mut s = 0;
-            for j in (0..i).rev() {
-                if self.cp[j] > self.cp[i] {
-                    s += 1;
-                }
-            }
-            x = (x + s) * i;
-        }
-        x
-    }
-
-    pub fn corner_orientation_coordinate(&self) -> usize {
-        self.co
-            .iter()
-            .take(7)
-            .fold(0, |acc, &co| 3 * acc + co as usize)
-    }
 }
 
 impl std::iter::Product for Cube {
@@ -501,82 +438,5 @@ mod tests {
         let superflip_moves: Cube = U * R2 * F * B * R * B2 * R * U2 * L * B2 * R * U3 * D3 * R2 * F * R3 * L * B2 * U2 * F2;
 
         assert_eq!(superflip_moves.to_facelets(), SUPERFLIP.to_facelets())
-    }
-
-    #[test]
-    fn corner_perms_solved() {
-        assert_eq!(
-            (
-                SOLVED.corner_perm_coordinate(),
-                SOLVED.corner_orientation_coordinate()
-            ),
-            (0, 0)
-        );
-    }
-
-    #[test]
-    fn corner_coordinates() {
-        let scramble = R * U * U * F * L * B;
-
-        assert_eq!(
-            (
-                scramble.corner_perm_coordinate(),
-                scramble.corner_orientation_coordinate()
-            ),
-            (4467, 2050)
-        );
-    }
-
-    #[test]
-    fn index_to_coords() {
-        use crate::heuristics::Corners;
-
-        let scramble = R * U * U * F * L * B;
-        let coords = (
-            scramble.corner_orientation_coordinate(),
-            scramble.corner_perm_coordinate(),
-        );
-
-        let index = Corners::coord(&scramble);
-
-        assert_eq!(coords, Corners::index_to_coords(index));
-    }
-
-    #[test]
-    fn coord_to_co() {
-        let scramble = R * U * U * F * L * B;
-
-        assert_eq!(
-            scramble.co,
-            co_from_coord(scramble.corner_orientation_coordinate())
-        );
-    }
-
-    #[test]
-    fn corner_permutation_round_trip() {
-        use crate::heuristics::Corners;
-
-        let scramble = R * U * U * F * L * B;
-
-        let index = Corners::coord(&scramble);
-
-        let (_, cpcoord) = Corners::index_to_coords(index);
-        let cp_state: [u8; 8] = cp_from_coord(cpcoord);
-
-        assert_eq!(cp_state, scramble.cp);
-    }
-
-    #[test]
-    fn corner_orientation_round_trip() {
-        use crate::heuristics::Corners;
-
-        let scramble = R * U * U * F * L * B;
-
-        let index = Corners::coord(&scramble);
-
-        let (cocoord, _) = Corners::index_to_coords(index);
-        let co_state: [u8; 8] = co_from_coord(cocoord);
-
-        assert_eq!(co_state, scramble.co);
     }
 }
