@@ -31,7 +31,7 @@ pub fn ida<T: Puzzle + Clone>(puzzle: T, max_depth: u8, h: impl Heuristic<T>) ->
 where
     for<'a> &'a T: std::ops::Mul<Move, Output = T>,
 {
-    for depth in 0..=max_depth {
+    for depth in h.lower_bound(&puzzle)..=max_depth {
         eprintln!("starting depth {depth}...");
         let start = std::time::Instant::now();
         let mut nodes = (0, 0);
@@ -95,10 +95,10 @@ where
 
         nodes.0 += 1;
 
-        Move::ALL.into_iter().find_map(|m| {
+        Move::ALL.into_iter().find_map(|&m| {
             let mut path = path.clone();
-            path.push(*m);
-            dfs(depth + 1, path, max_depth, &puzzle * *m, nodes, h)
+            path.push(m);
+            dfs(depth + 1, path, max_depth, &puzzle * m, nodes, h)
         })
     }
 }

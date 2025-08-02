@@ -8,21 +8,32 @@ mod pruning_table;
 mod puzzle;
 
 use cube::*;
+use mv::Move::*;
 use pruning_table::*;
 
 use puzzle::Puzzle;
 
 fn main() {
-    //let scramble = R * U * U * F * L * B * D * R;
-    let scramble = SUPERFLIP;
+    dbg!(PartialEdges::<0, 6>::MAX);
+    let scramble = R * U2 * F * L * B * D * R;
+    //let scramble = SUPERFLIP;
 
     scramble.print_net();
 
-    eprintln!("Loading EO pruning table...");
+    eprintln!("Loading first 6 edges pruning table...");
     let start = std::time::Instant::now();
+    let first6edges_pruning_table: Box<PruningTable<Cube, PartialEdges<0, 6>>> =
+        load_pruning_table("first6edges_pruning_table.bin");
+    eprintln!(
+        "Loaded first 6 edges pruning table in {:?}",
+        start.elapsed()
+    );
 
-    let eo_pruning_table: Box<PruningTable<Cube, EO>> = load_pruning_table("eo_pruning_table.bin");
-    eprintln!("Loaded EO pruning table in {:?}", start.elapsed());
+    eprintln!("Loading last 6 edges pruning table...");
+    let start = std::time::Instant::now();
+    let last6edges_pruning_table: Box<PruningTable<Cube, PartialEdges<6, 12>>> =
+        load_pruning_table("last6edges_pruning_table.bin");
+    eprintln!("Loaded last 6 edges pruning table in {:?}", start.elapsed());
 
     eprintln!("Loading Corner pruning table...");
     let start = std::time::Instant::now();
@@ -35,7 +46,11 @@ fn main() {
     if let Some(path) = ida(
         scramble,
         20,
-        (corner_pruning_table.as_ref(), eo_pruning_table.as_ref()),
+        (
+            corner_pruning_table.as_ref(),
+            first6edges_pruning_table.as_ref(),
+            last6edges_pruning_table.as_ref(),
+        ),
     ) {
         let elapsed = start.elapsed();
         eprintln!("Elapsed: {:?}", elapsed);
