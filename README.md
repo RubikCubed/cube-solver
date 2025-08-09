@@ -6,3 +6,5 @@ But if you're interested it started as a basic DFS, and then grew to [IDS](https
 This solver will find optimal (least moves) solutions.
 
 Huge thanks to https://github.com/pnotequalnp for his Cubing and Rust knowledge.
+
+![example](example.png)
